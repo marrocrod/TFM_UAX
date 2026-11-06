@@ -1,0 +1,17 @@
+# ── Downloaded structures and ProtT5 embeddings (regenerable) ──
+cache/
+
+# ── Python / Jupyter ──
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.venv/
+venv/
+.env
+
+# ── OS / editors ──
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/

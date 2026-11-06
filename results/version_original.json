@@ -1,0 +1,166 @@
+{
+  "fuente": "salidas guardadas de notebook/version_original/Notebook_final.ipynb",
+  "advertencia": "Resultados de la versión original, obtenidos con particiones por mutación (la misma proteína en entrenamiento y prueba), escalado ajustado antes de dividir, el embedding de ProtT5 desplazado una posición y, en la QNN, parada temprana sobre el conjunto de prueba. Son optimistas y no comparables con los de la versión corregida.",
+  "datos": {
+    "mutaciones_xgboost_fcnn": "2 647 de 2 648 (con secuencia)",
+    "mutaciones_qnn": 2464,
+    "caracteristicas_xgboost_fcnn": "descriptores + ProtT5 (1 066)",
+    "caracteristicas_qnn": "68 descriptores → PCA 16 (sin ProtT5)"
+  },
+  "protocolo": {
+    "cv": "KFold(5, shuffle) por mutación",
+    "prueba": "train_test_split 80/20 por mutación"
+  },
+  "modelos": {
+    "XGBoost": {
+      "cv_folds": [
+        {
+          "PCC": 0.688,
+          "MSE": 1.115,
+          "MAE": 0.812
+        },
+        {
+          "PCC": 0.7,
+          "MSE": 1.139,
+          "MAE": 0.814
+        },
+        {
+          "PCC": 0.668,
+          "MSE": 1.284,
+          "MAE": 0.849
+        },
+        {
+          "PCC": 0.584,
+          "MSE": 1.358,
+          "MAE": 0.9
+        },
+        {
+          "PCC": 0.658,
+          "MSE": 1.205,
+          "MAE": 0.823
+        }
+      ],
+      "cv": {
+        "PCC": [
+          0.66,
+          0.041
+        ],
+        "MSE": [
+          1.22,
+          0.09
+        ],
+        "MAE": [
+          0.84,
+          0.033
+        ]
+      },
+      "test": {
+        "PCC": 0.703,
+        "MSE": 1.07,
+        "MAE": 0.783,
+        "RMSE": 1.034
+      }
+    },
+    "FCNN": {
+      "cv_folds": [
+        {
+          "PCC": 0.601,
+          "MSE": 1.375,
+          "MAE": 0.879
+        },
+        {
+          "PCC": 0.66,
+          "MSE": 1.265,
+          "MAE": 0.846
+        },
+        {
+          "PCC": 0.624,
+          "MSE": 1.44,
+          "MAE": 0.896
+        },
+        {
+          "PCC": 0.59,
+          "MSE": 1.402,
+          "MAE": 0.9
+        },
+        {
+          "PCC": 0.595,
+          "MSE": 1.377,
+          "MAE": 0.88
+        }
+      ],
+      "cv": {
+        "PCC": [
+          0.614,
+          0.026
+        ],
+        "MSE": [
+          1.372,
+          0.058
+        ],
+        "MAE": [
+          0.88,
+          0.019
+        ]
+      },
+      "test": {
+        "PCC": 0.596,
+        "MSE": 1.387,
+        "MAE": 0.895,
+        "RMSE": 1.178
+      }
+    },
+    "QNN": {
+      "cv_folds": [
+        {
+          "PCC": 0.567,
+          "MSE": 1.339,
+          "MAE": 0.927
+        },
+        {
+          "PCC": 0.515,
+          "MSE": 1.443,
+          "MAE": 0.981
+        },
+        {
+          "PCC": 0.52,
+          "MSE": 1.5,
+          "MAE": 1.018
+        },
+        {
+          "PCC": 0.512,
+          "MSE": 1.545,
+          "MAE": 0.964
+        },
+        {
+          "PCC": 0.553,
+          "MSE": 1.321,
+          "MAE": 0.962
+        }
+      ],
+      "cv": {
+        "PCC": [
+          0.533,
+          0.022
+        ],
+        "MSE": [
+          1.43,
+          0.088
+        ],
+        "MAE": [
+          0.97,
+          0.03
+        ]
+      },
+      "test": {
+        "PCC": 0.54,
+        "MSE": 1.361,
+        "MAE": 0.893,
+        "RMSE": 1.167
+      }
+    }
+  },
+  "notas": {
+    "QNN": "La salida guardada de la prueba fija de la QNN procede de una versión del código distinta a la de la celda (ensemble por semillas)."
+  }
+}

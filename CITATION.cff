@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "Si utilizas este trabajo, cítalo con estos datos."
+title: "Modelos clásicos y cuánticos para la predicción de estabilidad proteica: un enfoque comparativo"
+type: software
+authors:
+  - family-names: "Roca Rodríguez"
+    given-names: "Marco Antonio"
+    affiliation: "Universidad Alfonso X el Sabio (UAX)"
+repository-code: "https://github.com/marrocrod/TFM_UAX"
+license: MIT
+keywords:
+  - protein stability
+  - ΔΔG prediction
+  - quantum machine learning
+  - XGBoost
+  - ProtT5
+  - S2648
+preferred-citation:
+  type: thesis
+  thesis-type: "Trabajo Fin de Máster"
+  title: "Modelos clásicos y cuánticos para la predicción de estabilidad proteica: un enfoque comparativo"
+  authors:
+    - family-names: "Roca Rodríguez"
+      given-names: "Marco Antonio"
+  institution:
+    name: "Universidad Alfonso X el Sabio (UAX), Máster Universitario en Inteligencia Artificial"
+  year: 2025
+  url: "https://github.com/marrocrod/TFM_UAX"
