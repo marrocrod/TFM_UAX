@@ -1,4 +1,4 @@
-"""Turn the results of a full run of the corrected notebook into tidy tables and README text.
+"""Turn the results of a full run of the notebook into tidy tables and README text.
 
 Reads results/resultados.json (written by Part VIII of notebook/estabilidad_proteica.ipynb) and:
   - writes results/metricas_cv.csv (one row per model and fold) and results/metricas_resumen.csv;
@@ -53,7 +53,7 @@ def main():
 
     d = data["datos"]
     lines = [START, "",
-             f"**Versión corregida**: validación cruzada agrupada por proteína (`GroupKFold(5)`) y prueba fija con "
+             f"**Versión actual** (corregida y con las mejoras de [`docs/mejoras.md`](docs/mejoras.md)): validación cruzada agrupada por proteína (`GroupKFold(5)`) y prueba fija con "
              f"{d['prueba_mutaciones']} mutaciones de {d['prueba_clusters']} *clusters* no vistos "
              f"({d['mutaciones']} mutaciones válidas en total).", "",
              "| Modelo | PCC (CV) | RMSE (CV) | MAE (CV) | PCC (prueba) | RMSE (prueba) | MAE (prueba) |",
@@ -64,7 +64,8 @@ def main():
                      f"| {fmt(cv['MAE'][0])} ± {fmt(cv['MAE'][1])} | {fmt(r['test']['PCC'])} | {fmt(r['test']['RMSE'])} "
                      f"| {fmt(r['test']['MAE'])} |")
     lines += ["", "<sub>RMSE y MAE en kcal/mol. Detalle por partición en "
-              "[`results/metricas_cv.csv`](results/metricas_cv.csv).</sub>", "", END]
+              "[`results/metricas_cv.csv`](results/metricas_cv.csv). *QNN (lineal)* es la ablación: la misma red con una capa "
+              "lineal en lugar del circuito.</sub>", "", END]
 
     readme = README.read_text(encoding="utf-8")
     if START not in readme or END not in readme:

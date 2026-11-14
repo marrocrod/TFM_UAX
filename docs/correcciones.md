@@ -105,12 +105,6 @@ Si TensorFlow carga antes su LLVM, crear después un optimizador de PyTorch pued
 
 ---
 
-## Lo que no se ha cambiado (fase de mejora)
+## Fase de mejora
 
-Estos puntos no son errores, pero limitan las métricas o el rendimiento. Quedan para la siguiente fase:
-
-- **Codificación de los residuos.** Se usa `ord(letra) − 65`, un número sin significado químico. Una codificación *one-hot* o por propiedades sería más adecuada.
-- **Variables sin usar.** No se usan `pH`, `T` ni la estructura 3D: accesibilidad al disolvente, contactos o estructura secundaria.
-- **Antisimetría.** No se explota que $\Delta\Delta G(\text{mutado}\to\text{original}) = -\Delta\Delta G(\text{original}\to\text{mutado})$ para aumentar los datos.
-- **Velocidad de la QNN.** `EstimatorQNN` tarda del orden de 20 minutos por época. Un circuito de 2 qubits se puede simular de forma exacta en PyTorch en milisegundos.
-- **Ajuste de hiperparámetros.** No se ha hecho ningún ajuste sistemático con el nuevo protocolo.
+Esta fase no cambió nada que no fuera un error. Las limitaciones que quedaban abiertas (codificación de los residuos, variables sin usar, antisimetría y velocidad de la QNN) se abordan en la fase siguiente, descrita en [`mejoras.md`](mejoras.md). Sigue pendiente el ajuste sistemático de hiperparámetros con el protocolo agrupado.

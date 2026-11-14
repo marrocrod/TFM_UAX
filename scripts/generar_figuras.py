@@ -3,7 +3,7 @@
 - pipeline.png        : data → features → three models → grouped evaluation
 - circuito_qnn.png    : the 2-qubit re-uploading circuit (Qiskit drawing)
 - datos.png           : ΔΔG distribution and mutations per protein cluster in S2648
-- resultados.png      : PCC and RMSE per model. Uses results/resultados.json (corrected
+- resultados.png      : PCC and RMSE per model. Uses results/resultados.json (current
                         version) when it exists, otherwise results/version_original.json.
 
 Run from the repository root:
@@ -25,7 +25,7 @@ FIG.mkdir(parents=True, exist_ok=True)
 
 BLUE, TEAL, GRAY, LGRAY = "#219BC3", "#00566C", "#858591", "#C0C0C8"
 QUANT, TINT_Q, TINT_B, TINT_G = "#7D3C98", "#F3EAF7", "#E8F5FA", "#F1F2F4"
-MODEL_COLORS = {"XGBoost": BLUE, "FCNN": TEAL, "QNN": QUANT}
+MODEL_COLORS = {"XGBoost": BLUE, "FCNN": TEAL, "QNN": QUANT, "QNN (lineal)": "#B9A3C9"}
 plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 11, "axes.edgecolor": LGRAY,
                      "axes.spines.top": False, "axes.spines.right": False})
 
@@ -52,18 +52,18 @@ def fig_pipeline():
     fig, ax = plt.subplots(figsize=(13, 4.2)); ax.set_xlim(0, 13); ax.set_ylim(0, 4.2); ax.axis("off")
     box(ax, 0.1, 1.45, 2.0, 1.3, "S2648", "2 648 mutaciones\n131 estructuras PDB")
     arrow(ax, 2.15, 2.1, 2.55, 2.1)
-    box(ax, 2.6, 2.35, 2.5, 1.15, "Descriptores (42)", "residuos · vecinos ±7\nΔ volumen, hidrof., flexib.", fs=10.5)
-    box(ax, 2.6, 0.7, 2.5, 1.15, "ProtT5-XL (1 024)", "embedding del\nresiduo mutado", fs=10.5)
+    box(ax, 2.6, 2.35, 2.5, 1.15, "Descriptores (112)", "one-hot · vecinos ±7\nestructura 3D · pH · T", fs=10.5)
+    box(ax, 2.6, 0.7, 2.5, 1.15, "ProtT5-XL (2 048)", "residuo original +\n(mutada − original)", fs=10.5)
     arrow(ax, 5.15, 2.9, 5.55, 2.25); arrow(ax, 5.15, 1.3, 5.55, 1.95)
-    box(ax, 5.6, 1.45, 1.6, 1.3, "X", "1 066 dim.\n(QNN: 68)", fc=TINT_G)
+    box(ax, 5.6, 1.45, 1.6, 1.3, "X", "2 160 dim.\n(QNN: 112)", fc=TINT_G)
     models = [("XGBoost", "400 árboles", TINT_B, TEAL, GRAY), ("FCNN", "320-384-256 · kNN", TINT_B, TEAL, GRAY),
-              ("QNN", "68 var. sin ProtT5 → 2 qubits", QUANT, "white", "white")]
+              ("QNN", "sin ProtT5 → 2 qubits", QUANT, "white", "white")]
     for k, (t, s, fc, tc, sc) in enumerate(models):
         y = 2.95 - k * 1.25
         arrow(ax, 7.25, 2.1, 7.75, y + 0.5)
         box(ax, 7.8, y, 2.1, 1.0, t, s, fc, tc, sc, fs=10.5)
         arrow(ax, 9.95, y + 0.5, 10.45, 2.1)
-    box(ax, 10.5, 1.2, 2.4, 1.8, "Evaluación", "GroupKFold(5) por proteína\n+ prueba fija 20 %\nPCC · RMSE · MAE", fc=TINT_G)
+    box(ax, 10.5, 1.2, 2.4, 1.8, "Evaluación", "GroupKFold(5) por proteína\n+ prueba fija 20 %\nantisimetría del ΔΔG", fc=TINT_G)
     save(fig, "pipeline.png")
 
 
@@ -107,7 +107,7 @@ def fig_datos():
 def fig_resultados():
     corrected = ROOT / "results" / "resultados.json"
     if corrected.exists():
-        data, label = json.load(open(corrected, encoding="utf-8")), "versión corregida · GroupKFold por proteína"
+        data, label = json.load(open(corrected, encoding="utf-8")), "versión actual · GroupKFold por proteína"
     else:
         data, label = json.load(open(ROOT / "results" / "version_original.json", encoding="utf-8")), \
             "versión original · KFold por mutación (optimista)"

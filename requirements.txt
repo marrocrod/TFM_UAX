@@ -1,5 +1,5 @@
 # Dependencies of notebook/estabilidad_proteica.ipynb and scripts/.
-# On Google Colab only biopython, xgboost, qiskit and qiskit-machine-learning are missing;
+# On Google Colab only biopython, xgboost and qiskit are missing;
 # the first cell of the notebook installs them.
 # Locally, install PyTorch first with the build that matches your GPU: https://pytorch.org/get-started/locally/
 
@@ -14,7 +14,6 @@ tensorflow>=2.15
 torch>=2.2
 transformers>=4.40
 sentencepiece>=0.2
-qiskit>=1.2
-qiskit-machine-learning>=0.8
+qiskit>=1.2                 # circuit drawing and check of the PyTorch simulator
 pylatexenc>=2.10        # circuit drawing in scripts/generar_figuras.py
 jupyterlab>=4.0

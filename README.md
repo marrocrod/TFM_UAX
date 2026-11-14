@@ -15,7 +15,7 @@ Trabajo Fin de Máster · Máster Universitario en Inteligencia Artificial · Un
 [![ProtT5](https://img.shields.io/badge/ProtT5--XL-1024d-00566C)](https://github.com/agemagician/ProtTrans)
 [![Licencia](https://img.shields.io/badge/licencia-MIT-858591)](LICENSE)
 
-[**Memoria**](docs/Memoria.pdf) · [**Notebook**](notebook/estabilidad_proteica.ipynb) · [**Metodología**](docs/metodologia.md) · [**Correcciones**](docs/correcciones.md) · [**Resultados**](results/) · [**Datos**](data/)
+[**Memoria**](docs/Memoria.pdf) · [**Notebook**](notebook/estabilidad_proteica.ipynb) · [**Metodología**](docs/metodologia.md) · [**Correcciones**](docs/correcciones.md) · [**Mejoras**](docs/mejoras.md) · [**Resultados**](results/) · [**Datos**](data/)
 
 <br>
 
@@ -35,12 +35,14 @@ Este trabajo compara tres enfoques sobre el conjunto de referencia **S2648**, co
 |---|---|---|
 | **XGBoost** | Árboles de decisión potenciados | Referencia clásica fuerte para datos tabulares |
 | **FCNN** | Red neuronal densa (Keras) | Red profunda con una meta-característica kNN y una pérdida que optimiza a la vez el error y la correlación |
-| **QNN** | Red híbrida cuántico-clásica (Qiskit + PyTorch) | Circuito variacional de 2 qubits con recarga de datos, combinado con una rama clásica |
+| **QNN** | Red híbrida cuántico-clásica (PyTorch, verificada con Qiskit) | Circuito variacional de 2 qubits con recarga de datos, combinado con una rama clásica |
 
 > [!IMPORTANT]
 > **Versión corregida.** La versión original del notebook tenía errores metodológicos que hacían las métricas optimistas: particiones por mutación en lugar de por proteína, el embedding de ProtT5 desplazado una posición, posiciones del PDB usadas como índices de la secuencia y parada temprana de la QNN sobre el conjunto de prueba, entre otros. Están todos corregidos y documentados en [`docs/correcciones.md`](docs/correcciones.md).
 >
-> Las cifras de la versión corregida se publicarán cuando termine su ejecución completa. Mientras tanto, abajo se muestran las de la versión original, marcadas como tales.
+> **Versión actual.** Sobre la versión corregida se han añadido ocho mejoras: simulación exacta de la QNN en PyTorch, ProtT5 de la secuencia mutada, codificación química de los residuos, estructura 3D, pH y temperatura, antisimetría del ΔΔG, ángulos acotados y una ablación de la QNN. Están descritas en [`docs/mejoras.md`](docs/mejoras.md).
+>
+> Las cifras de la versión actual se publicarán cuando termine su ejecución completa. Mientras tanto, abajo se muestran las de la versión original, marcadas como tales.
 
 ## Resultados
 
@@ -48,7 +50,7 @@ Este trabajo compara tres enfoques sobre el conjunto de referencia **S2648**, co
 
 <!-- RESULTADOS:INICIO -->
 
-**Versión corregida**: pendiente de la ejecución completa. La tabla se rellena con `python scripts/actualizar_resultados.py`.
+**Versión actual**: pendiente de la ejecución completa. La tabla se rellena con `python scripts/actualizar_resultados.py`.
 
 <!-- RESULTADOS:FIN -->
 
@@ -62,7 +64,7 @@ Este trabajo compara tres enfoques sobre el conjunto de referencia **S2648**, co
 
 <sub>Son las cifras publicadas en la [memoria](docs/Memoria.pdf) (Tablas 1–3). Son optimistas: mutaciones de la misma proteína aparecían a la vez en entrenamiento y en prueba, y la QNN usaba la prueba para su parada temprana. Detalle en [`results/version_original.json`](results/version_original.json).</sub>
 
-En la versión original, el orden de los modelos era **XGBoost > FCNN > QNN**. El modelo cuántico, con solo 2 qubits y 32 parámetros en el circuito, quedaba por debajo de las referencias clásicas. La versión corregida permitirá comprobar si ese orden se mantiene cuando los tres modelos se evalúan en igualdad de condiciones y sobre proteínas no vistas.
+En la versión original, el orden de los modelos era **XGBoost > FCNN > QNN**. El modelo cuántico, con solo 2 qubits y 32 parámetros en el circuito, quedaba por debajo de las referencias clásicas. La versión actual permitirá comprobar si ese orden se mantiene cuando los tres modelos se evalúan en igualdad de condiciones y sobre proteínas no vistas, y si el circuito aporta algo frente a una capa lineal del mismo tamaño.
 
 ## Datos
 
@@ -72,23 +74,18 @@ En la versión original, el orden de los modelos era **XGBoost > FCNN > QNN**. E
 
 ## Características
 
-**XGBoost y FCNN** describen cada mutación con **1 066 variables**:
+**XGBoost y FCNN** describen cada mutación con **2 160 variables**:
 
 | Bloque | Dim. | Contenido |
 |---|---:|---|
-| Residuos y posición | 4 | Residuo original y mutado; posición absoluta y relativa en la cadena |
-| Entorno en la secuencia | 34 | Los 14 vecinos a ±7 posiciones y la composición de aminoácidos de esa ventana |
+| Residuos y posición | 41 | *One-hot* del residuo original y del mutado; posición relativa en la cadena |
+| Entorno en la secuencia | 62 | Volumen, hidrofobicidad y flexibilidad de los 14 vecinos a ±7 posiciones, y composición de aminoácidos de esa ventana |
 | Fisicoquímica | 3 | Δ volumen, Δ hidrofobicidad y Δ flexibilidad |
-| Tipo de mutación | 1 | Identificador del par original → mutado |
-| **ProtT5-XL** | **1 024** | Embedding del residuo mutado, calculado sobre la secuencia completa de la cadena |
+| Estructura 3D | 4 | Accesibilidad relativa al disolvente, contactos a 8 y 12 Å y profundidad del residuo |
+| Condiciones | 2 | pH y temperatura del experimento |
+| **ProtT5-XL** | **2 048** | Embedding del residuo original (1 024) y diferencia entre la secuencia mutada y la original (1 024) |
 
-**La QNN** usa, por diseño, un vector más ligero de **68 variables sin ProtT5**, para que la entrada al circuito sea pequeña. Contiene:
-- las propiedades básicas de la mutación;
-- la codificación *one-hot* del residuo original y del mutado (20 + 20);
-- la posición normalizada;
-- la composición de la ventana ±7.
-
-`QNN_USE_PROTT5 = True` le añade el embedding.
+**La QNN** usa, por diseño, las mismas variables **sin ProtT5** (112), para que la entrada al circuito sea pequeña. `QNN_USE_PROTT5 = True` le añade los embeddings.
 
 Las posiciones de S2648 siguen la numeración del PDB. Por eso cada mutación se localiza en la secuencia a partir de la propia estructura, comprobando que el residuo coincide.
 
@@ -96,16 +93,19 @@ Las posiciones de S2648 siguen la numeración del PDB. Por eso cada mutación se
 
 <p align="center"><img src="docs/figures/circuito_qnn.png" width="90%" alt="Circuito de la QNN"></p>
 
-- **Entrada al circuito.** Las 68 variables de la QNN se reducen por PCA a 16 componentes, que entran por pares como ángulos $R_Y$ en **8 bloques de recarga de datos**.
+- **Entrada al circuito.** Las 112 variables de la QNN se reducen por PCA a 16 componentes, que se llevan a $(-\pi, \pi)$ y entran por pares como ángulos $R_Y$ en **8 bloques de recarga de datos**.
 - **Bloques.** Cada bloque entrelaza los dos qubits con una CNOT y aplica rotaciones entrenables $R_Z$ y $R_Y$. En total son 32 parámetros.
 - **Medición.** Se miden $\langle Z_0\rangle$, $\langle Z_1\rangle$ y $\langle Z_0 Z_1\rangle$.
 - **Rama clásica.** Las tres medidas se combinan con las 16 componentes y la meta-característica kNN en un MLP `→ 64 → 64 → 1`.
+- **Simulación.** El circuito se simula de forma exacta en PyTorch, por lotes. El notebook comprueba que coincide con Qiskit.
+- **Ablación.** Se evalúa también la misma red con una capa lineal `16 → 3` en lugar del circuito, para medir qué aporta la parte cuántica.
 
 ## Protocolo de evaluación
 
 - **Validación cruzada agrupada por proteína:** `GroupKFold(5)` sobre los *clusters* de S2648.
 - **Prueba fija:** el 20 % de los *clusters*, que el modelo no ve durante el entrenamiento.
 - **Sin fugas de información:** escalado, PCA, vecinos kNN y parada temprana se ajustan solo con la parte de entrenamiento de cada partición.
+- **Antisimetría del ΔΔG:** a cada mutación de entrenamiento se le añade su inversa con signo contrario, y la predicción se promedia con la de la inversa. Solo se evalúa sobre las mutaciones experimentales.
 - **Métricas:** correlación de Pearson (PCC), RMSE y MAE en kcal/mol.
 
 ## Estructura del repositorio
@@ -113,18 +113,19 @@ Las posiciones de S2648 siguen la numeración del PDB. Por eso cada mutación se
 ```text
 TFM_UAX/
 ├── notebook/
-│   ├── estabilidad_proteica.ipynb       # versión corregida, documentada paso a paso
+│   ├── estabilidad_proteica.ipynb       # versión actual, documentada paso a paso
 │   └── version_original/
 │       └── Notebook_final.ipynb         # versión original, conservada como referencia
 ├── data/
 │   └── s2648.csv                        # conjunto S2648
 ├── results/
 │   ├── version_original.json            # métricas de la versión original
-│   └── ...                              # resultados de la versión corregida (al ejecutarla)
+│   └── ...                              # resultados de la versión actual (al ejecutarla)
 ├── docs/
 │   ├── Memoria.pdf                      # memoria del TFM
 │   ├── metodologia.md                   # descripción técnica completa del pipeline
-│   ├── correcciones.md                  # qué estaba mal y cómo se ha corregido
+│   ├── correcciones.md                  # fase 1: qué estaba mal y cómo se ha corregido
+│   ├── mejoras.md                       # fase 2: mejoras de características, entrenamiento y simulación
 │   └── figures/                         # figuras de este README
 ├── scripts/
 │   ├── actualizar_resultados.py         # resultados del notebook → tablas y README
@@ -159,16 +160,13 @@ jupyter lab notebook/estabilidad_proteica.ipynb
 python scripts/actualizar_resultados.py    # tablas CSV, tabla del README y figuras
 ```
 
-Las estructuras del PDB y los embeddings de ProtT5 se descargan y calculan una sola vez y se guardan en `cache/`. ProtT5-XL pesa varios GB y necesita GPU para ir a una velocidad razonable. La QNN es la parte más lenta, porque su simulación con `EstimatorQNN` tarda del orden de minutos por época.
+Las estructuras del PDB y los embeddings de ProtT5 se descargan y calculan una sola vez y se guardan en `cache/`. ProtT5-XL pesa varios GB y necesita GPU para ir a una velocidad razonable: es la parte más lenta, porque hace una pasada por mutación. La QNN se simula de forma exacta en PyTorch y entrena en segundos.
 
 ## Próximos pasos
 
-- **Métricas.**
-  - Codificación química de los residuos.
-  - Usar el pH, la temperatura y la estructura 3D: accesibilidad al disolvente y contactos.
-  - Aumento de datos por antisimetría del ΔΔG.
-  - Ajuste de hiperparámetros con el protocolo agrupado.
-- **Rendimiento.** Simular el circuito de 2 qubits directamente en PyTorch, que es exacto y mucho más rápido que `EstimatorQNN`.
+- **Ejecución completa** de la versión actual y medida del efecto de cada mejora, activándolas de una en una.
+- **Ajuste de hiperparámetros** con el protocolo agrupado.
+- **Tamaño del circuito:** probar más qubits, ahora que la simulación es rápida.
 - **Continuación.** La línea de este trabajo sigue en el TFM del Máster en Computación Cuántica: [*Red neuronal cuántica híbrida para la predicción de estructura de proteínas*](https://github.com/marrocrod/qnn-protein_structure-prediction).
 
 ## Cita
